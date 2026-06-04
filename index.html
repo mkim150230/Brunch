@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>brunch & wine 🥂</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #7F77DD;
+    --purple-dark: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-text: #3C3489;
+    --bg: #faf9f6;
+    --card: #ffffff;
+    --text: #1a1916;
+    --muted: #6b6860;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 460px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .header p {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .progress-dot {
+    height: 5px;
+    flex: 1;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.1);
+    transition: background 0.3s;
+  }
+
+  .progress-dot.active { background: var(--purple); }
+
+  .question-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    line-height: 1.3;
+  }
+
+  .question-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    text-align: left;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    width: 100%;
+  }
+
+  .option-btn:hover {
+    border-color: var(--border-hover);
+    background: #f5f4f0;
+    transform: translateY(-1px);
+  }
+
+  .option-btn:active { transform: scale(0.99); }
+
+  .option-btn.selected {
+    border: 2px solid var(--purple);
+    background: var(--purple-light);
+    color: var(--purple-text);
+  }
+
+  .option-btn.selected .option-desc { color: var(--purple-dark); opacity: 0.7; }
+  .option-btn.selected .option-link { color: var(--purple-dark); }
+
+  .option-emoji { font-size: 22px; min-width: 28px; text-align: center; padding-top: 1px; }
+
+  .option-label { font-weight: 500; font-size: 15px; }
+
+  .option-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .option-link {
+    font-size: 12px;
+    color: var(--purple);
+    margin-top: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+  }
+
+  .option-link:hover { text-decoration: underline; }
+
+  .next-btn {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 14px;
+    background: var(--purple);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.3;
+    pointer-events: none;
+    transition: opacity 0.2s, background 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .next-btn.enabled { opacity: 1; pointer-events: auto; }
+  .next-btn:hover.enabled { background: var(--purple-dark); }
+  .next-btn:active.enabled { transform: scale(0.99); }
+
+  .confirm-note {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+    min-height: 20px;
+  }
+
+  .result-screen {
+    text-align: center;
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .result-emoji { font-size: 52px; margin-bottom: 1rem; }
+
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .result-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+  }
+
+  .summary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .summary-label { color: var(--muted); }
+
+  .summary-val {
+    font-weight: 500;
+    color: var(--text);
+    text-align: right;
+  }
+
+  .summary-link {
+    display: block;
+    font-size: 12px;
+    color: var(--purple);
+    text-decoration: none;
+    margin-top: 3px;
+  }
+
+  .summary-link:hover { text-decoration: underline; }
+
+  .restart-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 14px;
+    padding: 10px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .restart-btn:hover { background: #f0ede8; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>brunch & wine 🥂</h1>
+    <p>let's plan the perfect day out</p>
+  </div>
+
+  <div id="quiz">
+    <div class="progress" id="progress">
+      <div class="progress-dot active" id="dot-0"></div>
+      <div class="progress-dot" id="dot-1"></div>
+      <div class="progress-dot" id="dot-2"></div>
+    </div>
+    <p class="question-title" id="q-title"></p>
+    <p class="question-sub" id="q-sub"></p>
+    <div class="options" id="options"></div>
+    <button class="next-btn" id="next-btn">continue →</button>
+    <p class="confirm-note" id="confirm-note"></p>
+  </div>
+
+  <div class="result-screen" id="result-screen">
+    <div class="result-emoji">🥂</div>
+    <p class="result-title">the plan is set!</p>
+    <p class="result-sub">here's what's on the agenda</p>
+    <div class="summary" id="summary"></div>
+    <a id="email-btn" href="#" style="display:block; margin-bottom: 12px; padding: 14px; background: var(--purple); color: #fff; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; text-decoration: none; text-align: center; transition: background 0.15s;" onmouseover="this.style.background='#534AB7'" onmouseout="this.style.background='#7F77DD'">📧 send the plan</a>
+    <button class="restart-btn" onclick="restart()">↩ start over</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    title: "what time works for brunch? ⏰",
+    sub: "pick a time slot that works for you",
+    key: "time",
+    options: [
+      { emoji: "🌅", label: "10:00 am", desc: "early bird gets the table", url: null },
+      { emoji: "☀️", label: "10:30 am", desc: "nice and relaxed start", url: null },
+      { emoji: "🌤️", label: "11:00 am", desc: "peak brunch hour", url: null },
+      { emoji: "🕛", label: "11:30 am", desc: "take your time getting there", url: null },
+      { emoji: "🍽️", label: "12:00 pm", desc: "noon — the classic", url: null },
+      { emoji: "🌞", label: "12:30 pm", desc: "late and leisurely", url: null },
+      { emoji: "🌻", label: "1:00 pm", desc: "fashionably late brunch", url: null }
+    ]
+  },
+  {
+    title: "where are we brunching? 🍳",
+    sub: "pick a spot — tap the link to check it out first",
+    key: "restaurant",
+    options: [
+      { emoji: "🌸", label: "Bloom", desc: "fresh, feel-good brunch vibes", url: "https://www.yelp.com/biz/bloom-santa-clara" },
+      { emoji: "☕", label: "The Breakfast Club", desc: "classic brunch done right", url: "https://www.yelp.com/biz/the-breakfast-club-san-jose" },
+      { emoji: "🍁", label: "Sweet Maple", desc: "cozy and sweet, Cupertino favorite", url: "https://www.yelp.com/biz/sweet-maple-cupertino" }
+    ]
+  },
+  {
+    title: "and after brunch? 🍷",
+    sub: "time for a little wine tasting — pick your style",
+    key: "activity",
+    options: [
+      { emoji: "🏡", label: "local winery visit", desc: "head to a nearby winery and taste on-site", url: null },
+      { emoji: "🍾", label: "Stella Rosa Red", desc: "from Walmart", url: null },
+      { emoji: "🖤", label: "Stella Rosa Black", desc: "from Target", url: null }
+    ]
+  }
+];
+
+let current = 0;
+const answers = {};
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-sub').textContent = q.sub;
+
+  document.querySelectorAll('.progress-dot').forEach((d, i) => {
+    d.classList.toggle('active', i <= current);
+  });
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  q.options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    if (answers[q.key] && answers[q.key].label === opt.label) btn.classList.add('selected');
+
+    const linkHtml = opt.url
+      ? `<a class="option-link" href="${opt.url}" target="_blank" onclick="event.stopPropagation()">↗ view details</a>`
+      : '';
+
+    btn.innerHTML = `<span class="option-emoji">${opt.emoji}</span><div><div class="option-label">${opt.label}</div><div class="option-desc">${opt.desc}</div>${linkHtml}</div>`;
+    btn.addEventListener('click', () => selectOption(opt, btn));
+    container.appendChild(btn);
+  });
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = current < questions.length - 1 ? 'continue →' : 'see the plan 🎉';
+  nextBtn.classList.toggle('enabled', !!answers[q.key]);
+
+  const note = document.getElementById('confirm-note');
+  if (answers[q.key]) {
+    note.style.display = 'block';
+    note.textContent = `you picked: ${answers[q.key].label} ✓`;
+  } else {
+    note.style.display = 'none';
+  }
+}
+
+function selectOption(opt, btn) {
+  const q = questions[current];
+  answers[q.key] = opt;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('next-btn').classList.add('enabled');
+  const note = document.getElementById('confirm-note');
+  note.style.display = 'block';
+  note.textContent = `you picked: ${opt.label} ✓`;
+}
+
+document.getElementById('next-btn').addEventListener('click', () => {
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+});
+
+function showResult() {
+  document.getElementById('quiz').style.display = 'none';
+  const screen = document.getElementById('result-screen');
+  screen.style.display = 'block';
+  const t = answers.time;
+  const r = answers.restaurant;
+  const a = answers.activity;
+  const restaurantLink = r.url ? `<a class="summary-link" href="${r.url}" target="_blank">view details ↗</a>` : '';
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-row">
+      <span class="summary-label">⏰ time</span>
+      <span class="summary-val">${t.label}</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">🍳 brunch</span>
+      <span class="summary-val">${r.label}${restaurantLink}</span>
+    </div>
+    <div class="summary-row">
+      <span class="summary-label">🍷 after</span>
+      <span class="summary-val">${a.label}</span>
+    </div>
+  `;
+  const subject = encodeURIComponent('brunch & wine plan 🥂');
+  const body = encodeURIComponent(`here's the plan!\n\n⏰ time: ${t.label}\n🍳 brunch: ${r.label}${r.url ? ' — ' + r.url : ''}\n🍷 after: ${a.label}\n\nsee you there!`);
+  document.getElementById('email-btn').href = `mailto:mhk150230@gmail.com?subject=${subject}&body=${body}`;
+}
+
+function restart() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  current = 0;
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
